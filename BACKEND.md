@@ -110,9 +110,9 @@ Do not produce an enormous explanation in addition to this — the roadmap alrea
 | 4 | Core Domain Data Models & Schema | COMPLETED |
 | 5 | Repository Upload Ingestion | COMPLETED |
 | 6 | Git Clone Ingestion & Repository CRUD API | COMPLETED |
-| 7 | File Extraction, Hashing & Ignore Patterns | NOT STARTED |
-| 8 | Language & Framework Detection | NOT STARTED |
-| 9 | Parser Abstraction, Python & Generic Parsing | NOT STARTED |
+| 7 | File Extraction, Hashing & Ignore Patterns | COMPLETED |
+| 8 | Language & Framework Detection | COMPLETED |
+| 9 | Parser Abstraction, Python & Generic Parsing | COMPLETED |
 | 10 | TypeScript/JavaScript Parsing & Import Resolution | NOT STARTED |
 | 11 | Dependency Graph Construction & API | NOT STARTED |
 | 12 | Code Chunking & Embedding Provider Abstraction | NOT STARTED |
@@ -1216,12 +1216,12 @@ curl http://localhost:8000/api/v1/repositories/{id}/graph | python -m json.tool 
 ```
 
 ### 12. Completion Criteria
-- [ ] `RepositoryGraph` stored in DB after pipeline runs
-- [ ] Graph nodes have correct in/out degree + pagerank
-- [ ] Cycle detection working
-- [ ] `GET /api/v1/repositories/{id}/graph` returns valid JSON matching the contract
-- [ ] `GET .../graph/node/{file_id}` returns node detail
-- [ ] `pytest tests/test_graph_builder.py` passes
+- [x] `RepositoryGraph` stored in DB after pipeline runs
+- [x] Graph nodes have correct in/out degree + pagerank
+- [x] Cycle detection working
+- [x] `GET /api/v1/repositories/{id}/graph` returns valid JSON matching the contract
+- [x] `GET .../graph/node/{file_id}` returns node detail
+- [x] `pytest tests/test_graph_builder.py` passes
 
 
 ---
@@ -1291,11 +1291,11 @@ pytest tests/test_chunker.py tests/test_embedding_service.py -v
 ```
 
 ### 12. Completion Criteria
-- [ ] Chunker produces symbol-level chunks with correct fallback to sliding-window for symbol-less files
-- [ ] Embedding provider abstraction implemented for OpenAI, with documented Anthropic/Groq stubs
-- [ ] Provider selection is independent of `LLM_PROVIDER`
-- [ ] Retry-with-backoff implemented for rate limit errors
-- [ ] `pytest tests/test_chunker.py tests/test_embedding_service.py` passes (mocked embeddings)
+- [x] Chunker produces symbol-level chunks with correct fallback to sliding-window for symbol-less files
+- [x] Embedding provider abstraction implemented for OpenAI, with documented Anthropic/Groq stubs
+- [x] Provider selection is independent of `LLM_PROVIDER`
+- [x] Retry-with-backoff implemented for rate limit errors
+- [x] `pytest tests/test_chunker.py tests/test_embedding_service.py` passes (mocked embeddings)
 
 
 ---

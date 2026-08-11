@@ -2,9 +2,9 @@
 
 import uuid
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, BigInteger, Enum, Integer, String, Text
+from sqlalchemy import JSON, BigInteger, Boolean, Enum, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.code_chunk import CodeChunk
     from app.models.code_file import CodeFile
     from app.models.dependency import Dependency
+    from app.models.repository_graph import RepositoryGraph
     from app.models.symbol import Symbol
 
 
@@ -68,8 +69,17 @@ class Repository(Base, TimestampMixin):
     detected_languages: Mapped[dict[str, Any] | None] = mapped_column(
         JSON().with_variant(JSONB, "postgresql"), nullable=True
     )
+    frameworks: Mapped[list[str] | None] = mapped_column(
+        JSON().with_variant(JSONB, "postgresql"), nullable=True
+    )
 
     file_count: Mapped[int] = mapped_column(
+        Integer, default=0, server_default="0", nullable=False
+    )
+    has_cycles: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", nullable=False
+    )
+    cycle_count: Mapped[int] = mapped_column(
         Integer, default=0, server_default="0", nullable=False
     )
 
@@ -89,4 +99,7 @@ class Repository(Base, TimestampMixin):
     )
     analysis_jobs: Mapped[list["AnalysisJob"]] = relationship(
         back_populates="repository", cascade="all, delete-orphan"
+    )
+    graph: Mapped[Optional["RepositoryGraph"]] = relationship(
+        back_populates="repository", cascade="all, delete-orphan", uselist=False
     )

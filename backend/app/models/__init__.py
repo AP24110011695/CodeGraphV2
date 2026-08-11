@@ -5,6 +5,7 @@ from app.models.code_chunk import ChunkType, CodeChunk
 from app.models.code_file import CodeFile
 from app.models.dependency import Dependency, DependencyType
 from app.models.repository import Repository, RepositorySource, RepositoryStatus
+from app.models.repository_graph import RepositoryGraph
 from app.models.symbol import Symbol, SymbolKind
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "DependencyType",
     "JobStatus",
     "Repository",
+    "RepositoryGraph",
     "RepositorySource",
     "RepositoryStatus",
     "Symbol",

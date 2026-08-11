@@ -37,6 +37,9 @@ class RepositoryResponse(BaseModel):
     source: RepositorySource
     size_bytes: int = 0
     file_count: int = 0
+    primary_language: str | None = None
+    detected_languages: dict[str, int] | None = None
+    frameworks: list[str] | None = None
     created_at: datetime
 
 

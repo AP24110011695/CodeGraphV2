@@ -14,7 +14,7 @@ from app.schemas.repository import (
     RepositoryListResponse,
     RepositoryResponse,
 )
-from app.services import ingestion
+from app.services import code_parser, file_extractor, ingestion
 
 router = APIRouter(prefix="/repositories", tags=["repositories"])
 
@@ -160,3 +160,86 @@ async def delete_repository(
     """
     await ingestion.delete_repository(repo_id, db, settings)
     return {"message": f"Repository '{repo_id}' deleted successfully."}
+
+
+@router.post(
+    "/{repo_id}/extract",
+    status_code=status.HTTP_200_OK,
+    summary="[Debug] Extract repository files",
+    description=(
+        "Synchronously walk the source tree, hash all files, and populate "
+        "CodeFile rows. Debug-only — will be superseded by the Celery pipeline "
+        "in Phase 18."
+    ),
+)
+async def extract_repository_files(
+    repo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    settings: Settings = Depends(get_app_settings),
+) -> dict[str, object]:
+    """Walk the source tree of a repository and upsert CodeFile rows.
+
+    Args:
+        repo_id: The repository UUID path parameter.
+        db: Database session.
+        settings: Application settings.
+
+    Returns:
+        Summary dict with ``file_count`` and ``repo_id``.
+
+    Raises:
+        NotFoundError: If the repository does not exist.
+    """
+    repo = await ingestion.get_repository(repo_id, db)
+    code_files = await file_extractor.extract_files(
+        repo, db, upload_dir=settings.UPLOAD_DIR
+    )
+    return {
+        "repo_id": str(repo_id),
+        "file_count": len(code_files),
+        "message": "File extraction completed.",
+    }
+
+
+@router.post(
+    "/{repo_id}/parse",
+    status_code=status.HTTP_200_OK,
+    summary="[Debug] Parse repository symbols & dependencies",
+    description=(
+        "Synchronously extract files, run AST parsers (Python, TS, JS), and "
+        "resolve imports into Symbol and Dependency database rows. Debug-only."
+    ),
+)
+async def parse_repository_endpoint(
+    repo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    settings: Settings = Depends(get_app_settings),
+) -> dict[str, object]:
+    """Extract files and parse AST symbols & dependencies for a repository.
+
+    Args:
+        repo_id: The repository UUID path parameter.
+        db: Database session.
+        settings: Application settings.
+
+    Returns:
+        Summary dict with ``repo_id`` and ``symbol_count``.
+
+    Raises:
+        NotFoundError: If the repository does not exist.
+    """
+    repo = await ingestion.get_repository(repo_id, db)
+    code_files = await file_extractor.extract_files(
+        repo, db, upload_dir=settings.UPLOAD_DIR
+    )
+    symbols = await code_parser.parse_repository(
+        repo, code_files, db, upload_dir=settings.UPLOAD_DIR
+    )
+    return {
+        "repo_id": str(repo_id),
+        "file_count": len(code_files),
+        "symbol_count": len(symbols),
+        "message": "Repository parsing completed.",
+    }
+
+

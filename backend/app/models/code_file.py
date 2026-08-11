@@ -44,6 +44,8 @@ class CodeFile(Base, TimestampMixin):
     is_binary: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default="false", nullable=False
     )
+    parse_error: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+
 
 
     # Relationships
