@@ -64,3 +64,14 @@ class RepositoryListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class RepositoryStatusResponse(BaseModel):
+    """Schema for polling repository status and pipeline phase."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    status: RepositoryStatus = Field(description="Coarse repository status gate.")
+    progress: int = Field(default=0, ge=0, le=100, description="Percentage progress 0-100.")
+    phase: str = Field(description="Granular pipeline phase name.")
+    error_message: str | None = Field(default=None, description="Error message if status is error.")

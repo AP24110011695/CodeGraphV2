@@ -1368,10 +1368,10 @@ psql $DATABASE_URL -c "SELECT count(*) FROM code_chunk WHERE repository_id = '..
 ```
 
 ### 12. Completion Criteria
-- [ ] Embeddings generated and stored in `CodeChunk.embedding`
-- [ ] Semantic search returns ranked results matching the contract
-- [ ] `Repository.status = "ready"` after indexing completes
-- [ ] `pytest tests/test_indexing_and_search.py` passes (mocked embeddings)
+- [x] Embeddings generated and stored in `CodeChunk.embedding`
+- [x] Semantic search returns ranked results matching the contract
+- [x] `Repository.status = "ready"` after indexing completes
+- [x] `pytest tests/test_indexing_and_search.py` passes (mocked embeddings)
 
 
 ---
@@ -1445,10 +1445,10 @@ pytest tests/test_llm_providers.py -v
 ```
 
 ### 12. Completion Criteria
-- [ ] LLM provider abstraction implemented and mock-tested for OpenAI, Anthropic, and Groq
-- [ ] Factory selects provider based on `LLM_PROVIDER`
-- [ ] System + context-injection prompt templates implemented
-- [ ] `pytest tests/test_llm_providers.py` passes
+- [x] LLM provider abstraction implemented and mock-tested for OpenAI, Anthropic, and Groq
+- [x] Factory selects provider based on `LLM_PROVIDER`
+- [x] System + context-injection prompt templates implemented
+- [x] `pytest tests/test_llm_providers.py` passes
 
 
 ---
@@ -1539,12 +1539,12 @@ curl -N -X POST http://localhost:8000/api/v1/repositories/{id}/chat/sessions/{si
 ```
 
 ### 12. Completion Criteria
-- [ ] RAG pipeline retrieves relevant chunks and builds grounded prompts
-- [ ] SSE streaming response works end-to-end
-- [ ] Sources cited in stream response
-- [ ] Chat history persisted in DB
-- [ ] Multi-turn conversation context included in prompt
-- [ ] `pytest tests/test_rag.py` passes
+- [x] RAG pipeline retrieves relevant chunks and builds grounded prompts
+- [x] SSE streaming response works end-to-end
+- [x] Sources cited in stream response
+- [x] Chat history persisted in DB
+- [x] Multi-turn conversation context included in prompt
+- [x] `pytest tests/test_rag.py` passes
 
 
 ---
@@ -1609,10 +1609,10 @@ curl http://localhost:8000/api/v1/repositories/{id}/status
 ```
 
 ### 12. Completion Criteria
-- [ ] Files list/detail/symbols endpoints implemented
-- [ ] Status polling endpoint returns the same vocabulary as the future SSE stream
-- [ ] Path sanitization prevents escaping the repo's source directory
-- [ ] `pytest tests/test_files_and_status_api.py` passes
+- [x] Files list/detail/symbols endpoints implemented
+- [x] Status polling endpoint returns the same vocabulary as the future SSE stream
+- [x] Path sanitization prevents escaping the repo's source directory
+- [x] `pytest tests/test_files_and_status_api.py` passes
 
 
 ---
@@ -1702,11 +1702,11 @@ pytest tests/test_api_consistency.py -v
 ```
 
 ### 12. Completion Criteria
-- [ ] All endpoints in the table above implemented and documented
-- [ ] Error responses consistently formatted across every endpoint
-- [ ] List endpoints paginated with the canonical shape
-- [ ] OpenAPI docs accessible and complete at `/docs` and `/redoc`
-- [ ] `pytest tests/test_api_consistency.py` passes
+- [x] All endpoints in the table above implemented and documented
+- [x] Error responses consistently formatted across every endpoint
+- [x] List endpoints paginated with the canonical shape
+- [x] OpenAPI docs accessible and complete at `/docs` and `/redoc`
+- [x] `pytest tests/test_api_consistency.py` passes
 
 
 ---

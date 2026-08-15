@@ -7,6 +7,7 @@ All exceptions produce responses matching the canonical error format:
 from typing import Any
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -157,6 +158,18 @@ async def http_exception_handler(
     return _error_response(exc.status_code, code, detail)
 
 
+async def validation_exception_handler(
+    _request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """Handle FastAPI validation errors in canonical error format."""
+    return _error_response(
+        422,
+        "VALIDATION_ERROR",
+        "Request validation error",
+        details={"errors": exc.errors()},
+    )
+
+
 async def unhandled_exception_handler(
     _request: Request, exc: Exception
 ) -> JSONResponse:
@@ -169,6 +182,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     """Register all exception handlers on the FastAPI app."""
     app.add_exception_handler(AppException, app_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, unhandled_exception_handler)
 
 

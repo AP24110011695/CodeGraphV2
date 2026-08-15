@@ -58,9 +58,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     application = FastAPI(
-        title="CodeGraph v2",
-        description="AI-powered codebase intelligence platform",
+        title="CodeGraph v2 API",
+        description="AI-powered codebase intelligence platform backend API service.",
         version="2.0.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
         lifespan=lifespan,
     )
 

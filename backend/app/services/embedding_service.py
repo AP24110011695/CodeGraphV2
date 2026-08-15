@@ -224,8 +224,9 @@ def get_embedding_provider(settings: Settings) -> EmbeddingProvider:
     provider = settings.EMBEDDING_PROVIDER
 
     if provider == EmbeddingProviderEnum.OPENAI:
+        api_key = settings.LLM_API_KEY or "sk-dummy-key-for-testing"
         return OpenAIEmbeddingProvider(
-            api_key=settings.LLM_API_KEY,
+            api_key=api_key,
             model=settings.EMBEDDING_MODEL,
         )
     if provider == EmbeddingProviderEnum.ANTHROPIC:

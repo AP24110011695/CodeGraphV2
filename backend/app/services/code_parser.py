@@ -11,6 +11,7 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import Settings
 from app.core.import_resolver import resolve_import_path
 from app.core.parsers.base import BaseParser, ImportData, ParseResult
 from app.core.parsers.generic_parser import GenericParser
@@ -20,9 +21,10 @@ from app.core.parsers.typescript_parser import TypeScriptParser
 from app.models.analysis_job import AnalysisJob, JobStatus
 from app.models.code_file import CodeFile
 from app.models.dependency import Dependency
-from app.models.repository import Repository, RepositoryStatus
+from app.models.repository import Repository
 from app.models.symbol import Symbol
 from app.services.graph_builder import build_graph
+from app.services.indexer import index_repository
 
 # Thread pool for CPU-bound AST parsing
 _PARSER_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="code_parser")
@@ -72,6 +74,7 @@ async def parse_repository(
     files: list[CodeFile],
     db: AsyncSession,
     upload_dir: str = "./uploads",
+    settings: Settings | None = None,
 ) -> list[Symbol]:
     """Parse all non-binary source files in a repository and create Symbol rows.
 
@@ -198,13 +201,7 @@ async def parse_repository(
     # ---- Build dependency graph -----------------------------------------
     await build_graph(repo, db, upload_dir=upload_dir)
 
-    # Update Repository status to indexing
-    repo.status = RepositoryStatus.INDEXING
-
-    if job:
-        job.progress = 80
-
-    await db.commit()
-    await db.refresh(repo)
+    # ---- Vector indexing (chunking & embeddings) ------------------------
+    await index_repository(repo, db, settings=settings, upload_dir=upload_dir)
 
     return created_symbols

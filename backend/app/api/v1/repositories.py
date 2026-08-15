@@ -3,16 +3,19 @@
 import uuid
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
 from app.db.session import get_db
 from app.dependencies import get_app_settings
+from app.models.analysis_job import AnalysisJob
 from app.schemas.repository import (
     RepositoryCloneRequest,
     RepositoryListItem,
     RepositoryListResponse,
     RepositoryResponse,
+    RepositoryStatusResponse,
 )
 from app.services import code_parser, file_extractor, ingestion
 
@@ -241,5 +244,54 @@ async def parse_repository_endpoint(
         "symbol_count": len(symbols),
         "message": "Repository parsing completed.",
     }
+
+
+@router.get(
+    "/{repo_id}/status",
+    response_model=RepositoryStatusResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get repository status, progress percentage, and pipeline phase",
+    description="Polling fallback for coarse repository status, progress, and pipeline phase.",
+    responses={
+        404: {"description": "Repository not found"},
+    },
+)
+async def get_repository_status(
+    repo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> RepositoryStatusResponse:
+    """Poll repository coarse status, progress percentage, and granular pipeline phase.
+
+    Pulls from the latest AnalysisJob row for the repository.
+    """
+    repo = await ingestion.get_repository(repo_id, db)
+
+    res = await db.execute(
+        select(AnalysisJob).where(AnalysisJob.repository_id == repo.id)
+    )
+    job = res.scalar_one_or_none()
+
+    if job:
+        progress = job.progress
+        phase = job.phase
+        error_msg = repo.error_message
+    else:
+        if repo.status == RepositoryStatus.READY:
+            progress = 100
+            phase = "indexing"
+        elif repo.status == RepositoryStatus.ERROR:
+            progress = 0
+            phase = "ingestion"
+        else:
+            progress = 0
+            phase = "ingestion"
+        error_msg = repo.error_message
+
+    return RepositoryStatusResponse(
+        status=repo.status,
+        progress=progress,
+        phase=phase,
+        error_message=error_msg,
+    )
 
 

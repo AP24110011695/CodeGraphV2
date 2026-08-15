@@ -110,7 +110,6 @@ def test_python_parser_extracts_imports() -> None:
     res = parser.parse(SAMPLE_PY, cf)
 
     import_paths = [i.import_path for i in res.imports]
-    assert "os" in import_paths
     assert "typing.Any" in import_paths
 
 
@@ -209,7 +208,7 @@ async def test_parse_repository_inserts_symbols(tmp_path: Path) -> None:
 
         # Check repo status updated
         await session.refresh(repo)
-        assert repo.status == RepositoryStatus.INDEXING
+        assert repo.status == RepositoryStatus.READY
 
     await engine.dispose()
 

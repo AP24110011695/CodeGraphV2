@@ -4,18 +4,13 @@ from __future__ import annotations
 
 import uuid
 
-import pytest
-
 from app.core.chunker import (
     MAX_CHUNK_CHARS,
-    SLIDING_OVERLAP_LINES,
     SLIDING_WINDOW_LINES,
-    ChunkData,
     ChunkTypeValue,
     SymbolData,
     chunk_file,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

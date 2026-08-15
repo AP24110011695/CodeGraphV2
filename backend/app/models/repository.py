@@ -12,6 +12,7 @@ from app.db.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.analysis_job import AnalysisJob
+    from app.models.chat_session import ChatSession
     from app.models.code_chunk import CodeChunk
     from app.models.code_file import CodeFile
     from app.models.dependency import Dependency
@@ -102,4 +103,7 @@ class Repository(Base, TimestampMixin):
     )
     graph: Mapped[Optional["RepositoryGraph"]] = relationship(
         back_populates="repository", cascade="all, delete-orphan", uselist=False
+    )
+    chat_sessions: Mapped[list["ChatSession"]] = relationship(
+        back_populates="repository", cascade="all, delete-orphan"
     )

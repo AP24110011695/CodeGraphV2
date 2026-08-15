@@ -25,10 +25,8 @@ This module is **intentionally** pure-Python and stateless — no DB, no async.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
-from typing import NamedTuple
-
 
 # ---------------------------------------------------------------------------
 # Public data structures

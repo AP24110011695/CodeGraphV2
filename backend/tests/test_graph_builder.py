@@ -11,7 +11,6 @@ Covers:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -30,7 +29,6 @@ from app.models.code_file import CodeFile
 from app.models.dependency import Dependency, DependencyType
 from app.models.repository import Repository, RepositorySource, RepositoryStatus
 from app.models.repository_graph import RepositoryGraph
-from app.models.symbol import Symbol, SymbolKind
 from app.services.graph_builder import (
     _build_networkx_graph,
     _compute_node_metrics,
@@ -38,7 +36,6 @@ from app.services.graph_builder import (
     _serialize_graph,
     build_graph,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers / fixtures
@@ -205,7 +202,6 @@ class TestDetectCycles:
 
 class TestSerializeGraph:
     def test_all_nodes_and_edges_present(self) -> None:
-        import networkx as nx
 
         repo_id = uuid.uuid4()
         f1 = _file(repo_id, "a.py")
@@ -374,7 +370,6 @@ async def test_build_graph_upsert(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_graph_api_404_no_graph(tmp_path: Path) -> None:
     """GET /graph returns 404 when no RepositoryGraph has been built yet."""
-    from unittest.mock import AsyncMock, patch
 
     from httpx import ASGITransport, AsyncClient
 
@@ -418,7 +413,6 @@ async def test_graph_api_404_no_graph(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_graph_api_returns_graph(tmp_path: Path) -> None:
     """GET /graph returns GraphResponse with correct structure."""
-    from unittest.mock import AsyncMock, patch
 
     from httpx import ASGITransport, AsyncClient
 

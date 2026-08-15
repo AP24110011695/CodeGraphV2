@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -305,7 +305,7 @@ async def build_graph(
     )
     repo_graph = existing_result.scalar_one_or_none()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if repo_graph is None:
         repo_graph = RepositoryGraph(
             repository_id=repo.id,

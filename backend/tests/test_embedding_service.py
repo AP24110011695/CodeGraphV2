@@ -13,9 +13,8 @@ Covers:
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -30,7 +29,6 @@ from app.services.embedding_service import (
     OpenAIEmbeddingProvider,
     get_embedding_provider,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
