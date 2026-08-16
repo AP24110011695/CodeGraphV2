@@ -7,16 +7,16 @@ Exposes:
   GET  /api/v1/repositories/{repo_id}/chat/sessions/{session_id}/messages
 """
 
-from __future__ import annotations
-
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.auth import get_current_key
+from app.core.rate_limiter import limiter
 from app.dependencies import get_app_settings, get_db
 from app.exceptions import NotFoundError
 from app.schemas.chat import (
@@ -30,7 +30,9 @@ from app.services import chat_service
 from app.services.ingestion import get_repository
 from app.services.rag_service import stream_rag_answer
 
-router = APIRouter(prefix="/repositories", tags=["chat"])
+router = APIRouter(
+    prefix="/repositories", tags=["chat"], dependencies=[Depends(get_current_key)]
+)
 
 
 @router.post(
@@ -97,7 +99,9 @@ async def get_chat_session_detail(
         404: {"description": "Repository or chat session not found"},
     },
 )
+@limiter.limit("60/hour")
 async def send_chat_message(
+    request: Request,
     repo_id: uuid.UUID,
     session_id: uuid.UUID,
     msg_req: SendMessageRequest,

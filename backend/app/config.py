@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     # Authentication
     REQUIRE_AUTH: bool = False
     REQUIRE_AUTH_FOR_READS: bool = False
+    ADMIN_API_KEY: str = ""
 
     # Repository limits
     MAX_REPO_SIZE_MB: int = 500

@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.auth import get_current_key
 from app.dependencies import get_app_settings, get_db
 from app.exceptions import NotFoundError
 from app.models.code_chunk import CodeChunk
@@ -23,7 +24,9 @@ from app.schemas.search import SearchRequest, SearchResult
 from app.services.embedding_service import get_embedding_provider
 from app.services.ingestion import get_repository
 
-router = APIRouter(prefix="/repositories", tags=["search"])
+router = APIRouter(
+    prefix="/repositories", tags=["search"], dependencies=[Depends(get_current_key)]
+)
 
 
 def _cosine_similarity(v1: list[float], v2: list[float]) -> float:

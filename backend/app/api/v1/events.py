@@ -16,13 +16,16 @@ import uuid
 from collections.abc import AsyncGenerator
 
 import redis.asyncio as aioredis
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
+from app.core.auth import get_current_key
 from app.core.redis_client import get_redis_client
 from app.logging_config import get_logger
 
-router = APIRouter(prefix="/repositories", tags=["events"])
+router = APIRouter(
+    prefix="/repositories", tags=["events"], dependencies=[Depends(get_current_key)]
+)
 
 logger = get_logger(__name__)
 

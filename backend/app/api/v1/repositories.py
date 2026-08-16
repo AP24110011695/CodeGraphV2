@@ -2,11 +2,13 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.auth import get_current_key
+from app.core.rate_limiter import limiter
 from app.db.session import get_db
 from app.dependencies import get_app_settings
 from app.models.analysis_job import AnalysisJob
@@ -21,7 +23,11 @@ from app.schemas.repository import (
 from app.services import ingestion
 from app.tasks.analysis import start_analysis_pipeline
 
-router = APIRouter(prefix="/repositories", tags=["repositories"])
+router = APIRouter(
+    prefix="/repositories",
+    tags=["repositories"],
+    dependencies=[Depends(get_current_key)],
+)
 
 
 @router.post(
@@ -31,7 +37,9 @@ router = APIRouter(prefix="/repositories", tags=["repositories"])
     summary="Upload repository ZIP archive",
     description="Upload a ZIP file containing source code for repository ingestion.",
 )
+@limiter.limit("10/hour")
 async def upload_repository(
+    request: Request,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_app_settings),
@@ -56,6 +64,7 @@ async def upload_repository(
     ),
 )
 async def clone_repository(
+    request: Request,
     body: RepositoryCloneRequest,
     db: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_app_settings),
@@ -204,4 +213,3 @@ async def get_repository_status(
         phase=phase,
         error_message=error_msg,
     )
-

@@ -1,6 +1,7 @@
 """Domain ORM models for CodeGraph v2."""
 
 from app.models.analysis_job import AnalysisJob, JobStatus
+from app.models.api_key import ApiKey
 from app.models.chat_message import ChatMessage
 from app.models.chat_session import ChatSession
 from app.models.code_chunk import ChunkType, CodeChunk
@@ -12,6 +13,7 @@ from app.models.symbol import Symbol, SymbolKind
 
 __all__ = [
     "AnalysisJob",
+    "ApiKey",
     "ChatMessage",
     "ChatSession",
     "ChunkType",

@@ -123,9 +123,9 @@ Do not produce an enormous explanation in addition to this — the roadmap alrea
 | 17 | API Contract Consistency Audit & OpenAPI Docs | COMPLETED |
 | 18 | Background Job System (Celery + Redis) | COMPLETED |
 | 19 | Real-time Updates (SSE) | COMPLETED |
-| 20 | API Key Authentication & Key Management | NOT STARTED |
-| 21 | Rate Limiting & Security Hardening | NOT STARTED |
-| 22 | Observability, Metrics & Health Checks | NOT STARTED |
+| 20 | API Key Authentication & Key Management | COMPLETED |
+| 21 | Rate Limiting & Security Hardening | COMPLETED |
+| 22 | Observability, Metrics & Health Checks | COMPLETED |
 | 23 | Unit & Integration Testing Suite | NOT STARTED |
 | 24 | End-to-End Testing & Coverage Enforcement | NOT STARTED |
 | 25 | Production Readiness & Docker | NOT STARTED |
@@ -260,6 +260,15 @@ CodeGraph v2 is primarily a **local/self-hosted developer tool**, so the roadmap
 - The frontend never hard-codes an assumption about which mode it's talking to. It sends `X-API-Key` if one is configured, and reacts to a `401 {"error": {"code": "AUTH_REQUIRED", ...}}` response by prompting for a key — it does not block the app on a key up front. See `FRONTEND.md → Phase 6`.
 - Required on all mutating (`POST`/`PUT`/`DELETE`) requests once enforced; `GET` requests are optionally authenticated (`REQUIRE_AUTH_FOR_READS`, default `false`).
 - Bootstrap key: `ADMIN_API_KEY` env var creates a default key on first startup once Phase 20 lands.
+
+### Operational endpoints
+
+- `GET /health` is an unversioned liveness/readiness endpoint. It returns
+  `{"status": "ok", "version": "2.0.0", "checks": {"database": "ok" | "error", "redis": "ok" | "error", "celery": "ok" | "error}}`.
+  The top-level fields remain backward compatible; each check reflects a real
+  dependency probe.
+- `GET /metrics` is an unversioned Prometheus scrape endpoint and uses the
+  standard Prometheus text exposition format.
 
 ### Repository status vs. pipeline phase
 

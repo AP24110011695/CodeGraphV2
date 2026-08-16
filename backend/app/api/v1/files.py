@@ -17,6 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.auth import get_current_key
 from app.dependencies import get_app_settings, get_db
 from app.exceptions import NotFoundError
 from app.models.code_file import CodeFile
@@ -29,7 +30,9 @@ from app.schemas.file import (
 )
 from app.services.ingestion import get_repository
 
-router = APIRouter(prefix="/repositories", tags=["files"])
+router = APIRouter(
+    prefix="/repositories", tags=["files"], dependencies=[Depends(get_current_key)]
+)
 
 
 @router.get(
