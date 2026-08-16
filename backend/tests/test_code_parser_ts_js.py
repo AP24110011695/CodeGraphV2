@@ -281,6 +281,11 @@ async def test_parse_repository_populates_dependencies(tmp_path: Path) -> None:
     await engine.dispose()
 
 
+@pytest.mark.skip(
+    reason="Phase 18: debug /parse endpoint was removed; parsing is now "
+           "automated via the Celery pipeline chain. See test_tasks.py for "
+           "end-to-end pipeline tests."
+)
 @pytest.mark.asyncio
 async def test_parse_endpoint_integration(tmp_path: Path) -> None:
     """POST /{repo_id}/parse debug endpoint triggers full extraction and parsing."""

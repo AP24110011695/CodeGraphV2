@@ -84,7 +84,6 @@ def _detect_cycles(G: nx.DiGraph) -> tuple[bool, int]:
     """
     try:
         nx.find_cycle(G)
-        has_cycles = True
     except nx.NetworkXNoCycle:
         return False, 0
 

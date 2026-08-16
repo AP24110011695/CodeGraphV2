@@ -425,9 +425,14 @@ def _make_sample_zip() -> bytes:
     return buf.getvalue()
 
 
+@pytest.mark.skip(
+    reason="Phase 18: debug /extract endpoint was removed; extraction is now "
+           "automated via the Celery pipeline chain. See test_tasks.py for "
+           "end-to-end pipeline tests."
+)
 @pytest.mark.asyncio
 async def test_extract_endpoint_success(tmp_path: Path) -> None:
-    """POST /{repo_id}/extract should return file_count > 0 for a valid repo."""
+    """POST /{repo_id}/extract should return file_count >= 0 for a valid repo."""
     engine, factory = await _create_engine()
 
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -441,15 +446,12 @@ async def test_extract_endpoint_success(tmp_path: Path) -> None:
 
     transport = ASGITransport(app=app)  # type: ignore[arg-type]
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        # Upload a repo first
         upload_resp = await client.post(
             "/api/v1/repositories",
             files={"file": ("repo.zip", _make_sample_zip(), "application/zip")},
         )
         assert upload_resp.status_code == 200
         repo_id = upload_resp.json()["id"]
-
-        # Trigger extraction
         extract_resp = await client.post(f"/api/v1/repositories/{repo_id}/extract")
 
     assert extract_resp.status_code == 200

@@ -6,6 +6,7 @@ import uuid
 import zipfile
 from collections.abc import AsyncGenerator
 from pathlib import Path
+from types import CoroutineType
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -201,6 +202,8 @@ async def test_clone_repository_timeout(tmp_path: Path) -> None:
 
 
     async def _fake_wait_for(coro: object, timeout: float) -> None:
+        if isinstance(coro, CoroutineType):
+            coro.close()
         raise TimeoutError()
 
     with (

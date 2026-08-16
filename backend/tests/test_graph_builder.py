@@ -345,14 +345,14 @@ async def test_build_graph_upsert(tmp_path: Path) -> None:
     async with Session() as db:
         result = await db.execute(select(Repository).where(Repository.id == repo.id))
         repo2 = result.scalar_one()
-        rg1 = await build_graph(repo2, db, upload_dir=str(tmp_path))
+        await build_graph(repo2, db, upload_dir=str(tmp_path))
         await db.commit()
 
     # Second call — should update, not insert a duplicate
     async with Session() as db:
         result = await db.execute(select(Repository).where(Repository.id == repo.id))
         repo3 = result.scalar_one()
-        rg2 = await build_graph(repo3, db, upload_dir=str(tmp_path))
+        await build_graph(repo3, db, upload_dir=str(tmp_path))
         await db.commit()
 
         count_result = await db.execute(
@@ -473,4 +473,3 @@ async def test_graph_api_returns_graph(tmp_path: Path) -> None:
     assert "metrics" in data
     assert data["metrics"]["node_count"] == 2
     assert data["metrics"]["edge_count"] == 1
-

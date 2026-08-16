@@ -48,3 +48,12 @@ class AnalysisJob(Base, TimestampMixin):
 
     # Relationships
     repository: Mapped["Repository"] = relationship(back_populates="analysis_jobs")
+
+    @property
+    def error_message(self) -> str | None:
+        """Alias for error field."""
+        return self.error
+
+    @error_message.setter
+    def error_message(self, value: str | None) -> None:
+        self.error = value

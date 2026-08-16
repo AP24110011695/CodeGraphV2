@@ -10,6 +10,7 @@ from app.config import Settings
 from app.db.session import get_db
 from app.dependencies import get_app_settings
 from app.models.analysis_job import AnalysisJob
+from app.models.repository import RepositoryStatus
 from app.schemas.repository import (
     RepositoryCloneRequest,
     RepositoryListItem,
@@ -17,7 +18,8 @@ from app.schemas.repository import (
     RepositoryResponse,
     RepositoryStatusResponse,
 )
-from app.services import code_parser, file_extractor, ingestion
+from app.services import ingestion
+from app.tasks.analysis import start_analysis_pipeline
 
 router = APIRouter(prefix="/repositories", tags=["repositories"])
 
@@ -34,17 +36,12 @@ async def upload_repository(
     db: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_app_settings),
 ) -> RepositoryResponse:
-    """Upload a ZIP archive and initiate repository ingestion.
-
-    Args:
-        file: The uploaded ZIP file.
-        db: Database session.
-        settings: Application settings.
-
-    Returns:
-        RepositoryResponse with repository metadata and initial ingestion status.
-    """
+    """Upload a ZIP archive and initiate automated repository analysis pipeline."""
     repo = await ingestion.ingest_zip(file, db, settings)
+    try:
+        start_analysis_pipeline(str(repo.id))
+    except Exception:
+        pass  # Pipeline trigger is best-effort; worker handles retries
     return RepositoryResponse.model_validate(repo)
 
 
@@ -63,17 +60,12 @@ async def clone_repository(
     db: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_app_settings),
 ) -> RepositoryResponse:
-    """Clone a remote git repository and begin ingestion.
-
-    Args:
-        body: Clone request containing the HTTPS git URL.
-        db: Database session.
-        settings: Application settings.
-
-    Returns:
-        RepositoryResponse with repository metadata and initial ingestion status.
-    """
+    """Clone a remote git repository and begin automated analysis pipeline."""
     repo = await ingestion.ingest_git(body.git_url, db, settings)
+    try:
+        start_analysis_pipeline(str(repo.id))
+    except Exception:
+        pass  # Pipeline trigger is best-effort; worker handles retries
     return RepositoryResponse.model_validate(repo)
 
 
@@ -165,87 +157,6 @@ async def delete_repository(
     return {"message": f"Repository '{repo_id}' deleted successfully."}
 
 
-@router.post(
-    "/{repo_id}/extract",
-    status_code=status.HTTP_200_OK,
-    summary="[Debug] Extract repository files",
-    description=(
-        "Synchronously walk the source tree, hash all files, and populate "
-        "CodeFile rows. Debug-only — will be superseded by the Celery pipeline "
-        "in Phase 18."
-    ),
-)
-async def extract_repository_files(
-    repo_id: uuid.UUID,
-    db: AsyncSession = Depends(get_db),
-    settings: Settings = Depends(get_app_settings),
-) -> dict[str, object]:
-    """Walk the source tree of a repository and upsert CodeFile rows.
-
-    Args:
-        repo_id: The repository UUID path parameter.
-        db: Database session.
-        settings: Application settings.
-
-    Returns:
-        Summary dict with ``file_count`` and ``repo_id``.
-
-    Raises:
-        NotFoundError: If the repository does not exist.
-    """
-    repo = await ingestion.get_repository(repo_id, db)
-    code_files = await file_extractor.extract_files(
-        repo, db, upload_dir=settings.UPLOAD_DIR
-    )
-    return {
-        "repo_id": str(repo_id),
-        "file_count": len(code_files),
-        "message": "File extraction completed.",
-    }
-
-
-@router.post(
-    "/{repo_id}/parse",
-    status_code=status.HTTP_200_OK,
-    summary="[Debug] Parse repository symbols & dependencies",
-    description=(
-        "Synchronously extract files, run AST parsers (Python, TS, JS), and "
-        "resolve imports into Symbol and Dependency database rows. Debug-only."
-    ),
-)
-async def parse_repository_endpoint(
-    repo_id: uuid.UUID,
-    db: AsyncSession = Depends(get_db),
-    settings: Settings = Depends(get_app_settings),
-) -> dict[str, object]:
-    """Extract files and parse AST symbols & dependencies for a repository.
-
-    Args:
-        repo_id: The repository UUID path parameter.
-        db: Database session.
-        settings: Application settings.
-
-    Returns:
-        Summary dict with ``repo_id`` and ``symbol_count``.
-
-    Raises:
-        NotFoundError: If the repository does not exist.
-    """
-    repo = await ingestion.get_repository(repo_id, db)
-    code_files = await file_extractor.extract_files(
-        repo, db, upload_dir=settings.UPLOAD_DIR
-    )
-    symbols = await code_parser.parse_repository(
-        repo, code_files, db, upload_dir=settings.UPLOAD_DIR
-    )
-    return {
-        "repo_id": str(repo_id),
-        "file_count": len(code_files),
-        "symbol_count": len(symbols),
-        "message": "Repository parsing completed.",
-    }
-
-
 @router.get(
     "/{repo_id}/status",
     response_model=RepositoryStatusResponse,
@@ -293,5 +204,4 @@ async def get_repository_status(
         phase=phase,
         error_message=error_msg,
     )
-
 

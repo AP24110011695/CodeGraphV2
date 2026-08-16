@@ -23,8 +23,6 @@ from app.models.code_file import CodeFile
 from app.models.dependency import Dependency
 from app.models.repository import Repository
 from app.models.symbol import Symbol
-from app.services.graph_builder import build_graph
-from app.services.indexer import index_repository
 
 # Thread pool for CPU-bound AST parsing
 _PARSER_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="code_parser")
@@ -198,10 +196,9 @@ async def parse_repository(
         await db.flush()
         dependency_batch.clear()
 
-    # ---- Build dependency graph -----------------------------------------
-    await build_graph(repo, db, upload_dir=upload_dir)
+    # Mark repo ready after successful parsing (pipeline tasks may override later)
+    from app.models.repository import RepositoryStatus  # local import to avoid circular
 
-    # ---- Vector indexing (chunking & embeddings) ------------------------
-    await index_repository(repo, db, settings=settings, upload_dir=upload_dir)
-
+    repo.status = RepositoryStatus.READY
+    await db.commit()
     return created_symbols

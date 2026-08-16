@@ -101,7 +101,7 @@ class TestGetEmbeddingProvider:
         )
         with patch("app.services.embedding_service.OpenAIEmbeddingProvider") as MockCls:
             MockCls.return_value = MagicMock(spec=EmbeddingProvider)
-            provider = get_embedding_provider(settings)
+            get_embedding_provider(settings)
         MockCls.assert_called_once()
 
     def test_custom_provider_raises_value_error(self) -> None:

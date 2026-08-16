@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.chat import router as chat_router
+from app.api.v1.events import router as events_router
 from app.api.v1.files import router as files_router
 from app.api.v1.graph import router as graph_router
 from app.api.v1.repositories import router as repositories_router
@@ -10,6 +11,7 @@ from app.api.v1.search import router as search_router
 
 api_v1_router = APIRouter()
 api_v1_router.include_router(repositories_router)
+api_v1_router.include_router(events_router)
 api_v1_router.include_router(graph_router)
 api_v1_router.include_router(search_router)
 api_v1_router.include_router(chat_router)

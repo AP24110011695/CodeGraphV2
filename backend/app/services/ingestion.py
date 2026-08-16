@@ -247,41 +247,25 @@ async def ingest_git(
     return repo
 
 
-async def ingest_zip(
-    file: UploadFile,
+async def ingest_zip_bytes(
+    filename: str,
+    content: bytes,
     db: AsyncSession,
     settings: Settings | None = None,
 ) -> Repository:
-    """Validate, store, extract, and record an uploaded ZIP repository archive.
-
-    Args:
-        file: Uploaded file object from FastAPI endpoint.
-        db: Async database session.
-        settings: Optional Settings override.
-
-    Returns:
-        Created Repository database instance.
-
-    Raises:
-        ValidationError: If file is invalid or unsafe.
-        TooLargeError: If file exceeds maximum size limit.
-    """
+    """Validate, store, extract, and record a repository ZIP archive from raw bytes."""
     if settings is None:
         settings = get_settings()
 
     max_size_bytes = settings.MAX_REPO_SIZE_MB * 1024 * 1024
 
-    # Validate filename extension
-    filename = file.filename or "upload.zip"
     if not filename.lower().endswith(".zip"):
         raise ValidationError(
             message="Only .zip files are supported for archive upload",
             code="INVALID_FILE_TYPE",
         )
 
-    # Read uploaded file content to inspect size and save
-    contents = await file.read()
-    if len(contents) > max_size_bytes:
+    if len(content) > max_size_bytes:
         raise TooLargeError(
             message=f"Uploaded ZIP exceeds max size of {settings.MAX_REPO_SIZE_MB}MB",
             code="PAYLOAD_TOO_LARGE",
@@ -292,7 +276,6 @@ async def ingest_zip(
     clean_name = re.sub(r"[^\w\s-]", "", raw_name).strip() or "repository"
     slug = _create_unique_slug(clean_name, repo_id)
 
-    # Prepare storage paths
     upload_dir = Path(settings.UPLOAD_DIR) / str(repo_id)
     raw_zip_path = upload_dir / "raw.zip"
     source_dir = upload_dir / "source"
@@ -300,10 +283,8 @@ async def ingest_zip(
     upload_dir.mkdir(parents=True, exist_ok=True)
     source_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save raw zip file
-    raw_zip_path.write_bytes(contents)
+    raw_zip_path.write_bytes(content)
 
-    # Validate zip file integrity and safety
     try:
         with zipfile.ZipFile(raw_zip_path, "r") as zf:
             file_count = _validate_zip_members(zf)
@@ -318,11 +299,9 @@ async def ingest_zip(
         shutil.rmtree(upload_dir, ignore_errors=True)
         raise
 
-    # Infer final human-readable repository name
     repo_name = detect_repo_name(source_dir, default_name=clean_name)
-    total_size = len(contents)
+    total_size = len(content)
 
-    # Create DB Repository record
     repo = Repository(
         id=repo_id,
         name=repo_name,
@@ -335,7 +314,6 @@ async def ingest_zip(
     db.add(repo)
     await db.flush()
 
-    # Update status to ingesting and record AnalysisJob row
     repo.status = RepositoryStatus.INGESTING
     analysis_job = AnalysisJob(
         repository_id=repo.id,
@@ -348,6 +326,17 @@ async def ingest_zip(
     await db.refresh(repo)
 
     return repo
+
+
+async def ingest_zip(
+    file: UploadFile,
+    db: AsyncSession,
+    settings: Settings | None = None,
+) -> Repository:
+    """Validate, store, extract, and record an uploaded ZIP repository archive."""
+    filename = file.filename or "upload.zip"
+    contents = await file.read()
+    return await ingest_zip_bytes(filename, contents, db, settings)
 
 
 async def get_repository(repo_id: uuid.UUID, db: AsyncSession) -> Repository:

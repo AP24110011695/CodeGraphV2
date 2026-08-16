@@ -113,16 +113,16 @@ Do not produce an enormous explanation in addition to this — the roadmap alrea
 | 7 | File Extraction, Hashing & Ignore Patterns | COMPLETED |
 | 8 | Language & Framework Detection | COMPLETED |
 | 9 | Parser Abstraction, Python & Generic Parsing | COMPLETED |
-| 10 | TypeScript/JavaScript Parsing & Import Resolution | NOT STARTED |
-| 11 | Dependency Graph Construction & API | NOT STARTED |
-| 12 | Code Chunking & Embedding Provider Abstraction | NOT STARTED |
-| 13 | Vector Indexing & Semantic Search API | NOT STARTED |
-| 14 | LLM Provider Abstraction & Prompt Management | NOT STARTED |
-| 15 | RAG Pipeline, Chat History & Chat API | NOT STARTED |
-| 16 | Files & Status API Completion | NOT STARTED |
-| 17 | API Contract Consistency Audit & OpenAPI Docs | NOT STARTED |
-| 18 | Background Job System (Celery + Redis) | NOT STARTED |
-| 19 | Real-time Updates (SSE) | NOT STARTED |
+| 10 | TypeScript/JavaScript Parsing & Import Resolution | COMPLETED |
+| 11 | Dependency Graph Construction & API | COMPLETED |
+| 12 | Code Chunking & Embedding Provider Abstraction | COMPLETED |
+| 13 | Vector Indexing & Semantic Search API | COMPLETED |
+| 14 | LLM Provider Abstraction & Prompt Management | COMPLETED |
+| 15 | RAG Pipeline, Chat History & Chat API | COMPLETED |
+| 16 | Files & Status API Completion | COMPLETED |
+| 17 | API Contract Consistency Audit & OpenAPI Docs | COMPLETED |
+| 18 | Background Job System (Celery + Redis) | COMPLETED |
+| 19 | Real-time Updates (SSE) | COMPLETED |
 | 20 | API Key Authentication & Key Management | NOT STARTED |
 | 21 | Rate Limiting & Security Hardening | NOT STARTED |
 | 22 | Observability, Metrics & Health Checks | NOT STARTED |

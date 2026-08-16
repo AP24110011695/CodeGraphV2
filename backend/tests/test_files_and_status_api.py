@@ -141,6 +141,35 @@ async def test_get_repository_status_404() -> None:
     assert resp.status_code == 404
 
 
+@pytest.mark.asyncio
+async def test_get_repository_status_without_job_uses_repository_status() -> None:
+    """A ready repository without a job still reports terminal progress."""
+    from app.main import create_app
+
+    settings = _make_settings()
+    test_app = create_app(settings=settings)
+    engine, session_factory = await _make_engine()
+
+    async with session_factory() as db:
+        repo = _repo()
+        db.add(repo)
+        await db.commit()
+
+    async def _override_get_db():
+        async with session_factory() as session:
+            yield session
+
+    test_app.dependency_overrides[get_db] = _override_get_db
+    transport = ASGITransport(app=test_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get(f"/api/v1/repositories/{repo.id}/status")
+
+    test_app.dependency_overrides.clear()
+    assert response.status_code == 200
+    assert response.json()["progress"] == 100
+    assert response.json()["phase"] == "indexing"
+
+
 # ---------------------------------------------------------------------------
 # Files API Tests
 # ---------------------------------------------------------------------------

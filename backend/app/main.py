@@ -26,16 +26,26 @@ def run_migrations() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan handler for startup/shutdown hooks."""
-    settings = get_settings()
+    from app.core.redis_client import close_redis, init_redis
+
+    settings = getattr(app.state, "settings", get_settings())
     if settings.is_development:
         try:
             run_migrations()
             logger.info("database_migrations_applied")
         except Exception as exc:
             logger.warning("database_migrations_failed_or_skipped", error=str(exc))
+
+    # Initialize async Redis client pool
+    app.state.redis = await init_redis(settings)
+    logger.info("redis_client_initialized")
+
     yield
 
     # Shutdown
+    await close_redis()
+    app.state.redis = None
+    logger.info("redis_client_closed")
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -65,6 +75,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         redoc_url="/redoc",
         lifespan=lifespan,
     )
+    application.state.settings = settings
 
     # CORS middleware
     cors_origins: list[str] = (
@@ -93,7 +104,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {"status": "ok", "version": "2.0.0"}
 
     return application
-
 
 
 app = create_app()
