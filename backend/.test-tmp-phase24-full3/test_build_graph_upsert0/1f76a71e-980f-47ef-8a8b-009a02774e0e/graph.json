@@ -1,0 +1,1 @@
+{"metrics": {"node_count": 1, "edge_count": 0, "has_cycles": false, "cycle_count": 0, "entry_point_count": 0, "leaf_count": 1}, "nodes": [{"id": "440ae088-a791-4d4d-a414-db5e72dd8fb7", "path": "x.py", "language": "Python", "symbol_count": 0, "metrics": {"in_degree": 0, "out_degree": 0, "pagerank": 1.0, "is_entry_point": false, "is_leaf": true}}], "edges": []}

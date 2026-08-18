@@ -126,9 +126,9 @@ Do not produce an enormous explanation in addition to this — the roadmap alrea
 | 20 | API Key Authentication & Key Management | COMPLETED |
 | 21 | Rate Limiting & Security Hardening | COMPLETED |
 | 22 | Observability, Metrics & Health Checks | COMPLETED |
-| 23 | Unit & Integration Testing Suite | NOT STARTED |
-| 24 | End-to-End Testing & Coverage Enforcement | NOT STARTED |
-| 25 | Production Readiness & Docker | NOT STARTED |
+| 23 | Unit & Integration Testing Suite | BLOCKED |
+| 24 | End-to-End Testing & Coverage Enforcement | BLOCKED |
+| 25 | Production Readiness & Docker | BLOCKED |
 
 Update a row to `IN PROGRESS` when starting a phase, and to `COMPLETED` only once every completion criterion and verification step in that phase actually passes. Use `BLOCKED` (with an explanation in the completion report) if a genuine blocker prevents finishing. Do not rewrite historical status entries except to move a phase forward through this lifecycle.
 

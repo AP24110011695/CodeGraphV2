@@ -1,0 +1,19 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- C:\Projects\CodeGraphV2\backend\.venv\Scripts\python.exe
+rootdir: C:\Projects\CodeGraphV2\backend
+configfile: pyproject.toml
+plugins: anyio-4.14.2, asyncio-1.4.0, cov-7.1.0, respx-0.23.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 229 items
+
+tests/e2e/test_smoke.py::test_upload_search_and_chat_smoke SKIPPED (set
+E2E=true to run against services)                                        [  0%]
+tests/integration/test_chat_integration.py::test_chat_stream_is_persisted_with_sources SKIPPED [  0%]
+tests/integration/test_full_pipeline.py::test_full_pipeline_reaches_ready_with_indexed_graph SKIPPED [  1%]
+tests/integration/test_search_integration.py::test_semantic_search_returns_matching_chunk SKIPPED [  1%]
+tests/test_api_consistency.py::test_openapi_docs_endpoints PASSED        [  2%]
+tests/test_api_consistency.py::test_canonical_error_format_on_404 PASSED [  2%]
+tests/test_api_consistency.py::test_canonical_error_format_on_422_validation PASSED [  3%]
+tests/test_api_consistency.py::test_canonical_paginated_list_format PASSED [  3%]
+tests/test_api_consistency.py::test_health_check_endpoint PASSED         [  3%]
+tests/test_auth.py::test_auth_disabled_leaves_mutating_request_open 

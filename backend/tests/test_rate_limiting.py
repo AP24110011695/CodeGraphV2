@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import HTTPException
@@ -30,11 +31,17 @@ def _settings(tmp_path: Path) -> Settings:
 
 
 @pytest.mark.asyncio
-async def test_general_rate_limit_and_security_headers(tmp_path: Path) -> None:
+async def test_general_rate_limit_and_security_headers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """The 101st general request is rejected with canonical 429 and headers."""
     from app.main import create_app
 
     limiter.reset()
+    monkeypatch.setattr(
+        "app.main.run_health_checks",
+        AsyncMock(return_value={"database": "ok", "redis": "ok", "celery": "ok"}),
+    )
     app = create_app(settings=_settings(tmp_path))
     transport = ASGITransport(app=app, client=("198.51.100.1", 1234))
     async with AsyncClient(transport=transport, base_url="http://test") as client:

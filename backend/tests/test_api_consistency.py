@@ -24,7 +24,6 @@ from app.db.base import Base
 from app.dependencies import get_db
 from app.models.repository import Repository, RepositorySource, RepositoryStatus
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -91,7 +90,7 @@ async def test_openapi_docs_endpoints() -> None:
 
 @pytest.mark.asyncio
 async def test_canonical_error_format_on_404() -> None:
-    """404 errors adhere strictly to {"error": {"code": ..., "message": ..., "details": ...}}."""
+    """404 errors adhere strictly to the canonical error object shape."""
     from app.main import create_app
 
     settings = _make_settings()
@@ -222,4 +221,7 @@ async def test_health_check_endpoint() -> None:
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.get("/health")
         assert resp.status_code == 200
-        assert resp.json() == {"status": "ok", "version": "2.0.0"}
+        payload = resp.json()
+        assert payload["status"] == "ok"
+        assert payload["version"] == "2.0.0"
+        assert set(payload["checks"]) == {"database", "redis", "celery"}
