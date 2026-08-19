@@ -26,8 +26,8 @@ Identical to `BACKEND.md → Autonomous Execution Protocol` — read it there. I
 
 | Phase | Name                                              | Status      |
 | ----- | ------------------------------------------------- | ----------- |
-| 1     | Project Scaffold & Tooling                        | NOT STARTED |
-| 2     | API Client Layer & Mock API Foundation            | NOT STARTED |
+| 1     | Project Scaffold & Tooling                        | COMPLETED   |
+| 2     | API Client Layer & Mock API Foundation            | COMPLETED   |
 | 3     | Design Tokens & Core Primitives                   | NOT STARTED |
 | 4     | Composite UI Components & Kitchen Sink            | NOT STARTED |
 | 5     | Routing & Application Shell Layout                | NOT STARTED |
