@@ -7,7 +7,7 @@ describe('MockApiClient', () => {
   let client: MockApiClient
 
   beforeEach(() => {
-    client = new MockApiClient({ latencyMs: 0, pipelineStepDurationMs: 50 })
+    client = new MockApiClient({ latencyMs: 0, pipelineStepDurationMs: 200 })
   })
 
   it('returns health check status', async () => {
@@ -49,18 +49,20 @@ describe('MockApiClient', () => {
     expect(initialStatus.status).toBe('pending')
     expect(initialStatus.phase).toBe('ingestion')
 
-    // Advance time past steps
-    await new Promise((r) => setTimeout(r, 60))
+    // Advance time into stage 2 window (200–400ms): 'ingesting'
+    await new Promise((r) => setTimeout(r, 250))
     const stage2 = await client.getRepositoryStatus(created.id)
     expect(stage2.status).toBe('ingesting')
     expect(stage2.phase).toBe('extraction')
 
-    await new Promise((r) => setTimeout(r, 60))
+    // Advance time into stage 3 window (400–600ms): 'parsing'
+    await new Promise((r) => setTimeout(r, 250))
     const stage3 = await client.getRepositoryStatus(created.id)
     expect(stage3.status).toBe('parsing')
     expect(stage3.phase).toBe('parsing')
 
-    await new Promise((r) => setTimeout(r, 160))
+    // Advance time past all stages (≥800ms from creation): 'ready'
+    await new Promise((r) => setTimeout(r, 500))
     const readyStatus = await client.getRepositoryStatus(created.id)
     expect(readyStatus.status).toBe('ready')
     expect(readyStatus.progress).toBe(100)

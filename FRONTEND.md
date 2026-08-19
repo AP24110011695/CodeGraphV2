@@ -28,9 +28,9 @@ Identical to `BACKEND.md → Autonomous Execution Protocol` — read it there. I
 | ----- | ------------------------------------------------- | ----------- |
 | 1     | Project Scaffold & Tooling                        | COMPLETED   |
 | 2     | API Client Layer & Mock API Foundation            | COMPLETED   |
-| 3     | Design Tokens & Core Primitives                   | NOT STARTED |
-| 4     | Composite UI Components & Kitchen Sink            | NOT STARTED |
-| 5     | Routing & Application Shell Layout                | NOT STARTED |
+| 3     | Design Tokens & Core Primitives                   | COMPLETED   |
+| 4     | Composite UI Components & Kitchen Sink            | COMPLETED   |
+| 5     | Routing & Application Shell Layout                | COMPLETED   |
 | 6     | Global State, Connection Settings & Reactive Auth | NOT STARTED |
 | 7     | Repository List & Upload/Clone UI                 | NOT STARTED |
 | 8     | Repository Overview Page & API Hooks              | NOT STARTED |
