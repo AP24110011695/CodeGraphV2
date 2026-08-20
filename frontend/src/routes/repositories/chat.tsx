@@ -1,73 +1,100 @@
+import * as React from 'react'
 import { useParams } from '@tanstack/react-router'
-import { MessageSquare, Sparkles, Send } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { mockChatMessages } from '@/lib/api'
+import { ChatLayout } from '@/features/chat/components/chat-layout'
+import { useChatSessions } from '@/features/chat/hooks/use-chat-session'
+import { useChatHistory } from '@/features/chat/hooks/use-chat-history'
+import type { ChatMessageResponse } from '@/lib/api/types'
 
 export function RepositoryChatPage() {
   const { repoId } = useParams({ strict: false })
+  const [activeSessionId, setActiveSessionId] = React.useState<string | null>(null)
+  const [localMessages, setLocalMessages] = React.useState<ChatMessageResponse[]>([])
+  const [isSending, setIsSending] = React.useState(false)
+
+  const {
+    sessions,
+    isLoading: sessionsLoading,
+    createSession,
+  } = useChatSessions(repoId)
+
+  // Auto-select or create session on initial mount
+  React.useEffect(() => {
+    if (!activeSessionId && sessions.length > 0) {
+      setActiveSessionId(sessions[0].id)
+    } else if (!activeSessionId && !sessionsLoading && repoId && sessions.length === 0) {
+      createSession({ title: 'General Conversation' }).then((res) => {
+        setActiveSessionId(res.session_id)
+      })
+    }
+  }, [activeSessionId, sessions, sessionsLoading, repoId, createSession])
+
+  const {
+    data: fetchedMessages = [],
+    isLoading: historyLoading,
+    isError: historyError,
+  } = useChatHistory(repoId, activeSessionId)
+
+  // Sync fetched history into local display messages
+  React.useEffect(() => {
+    if (fetchedMessages.length > 0) {
+      setLocalMessages(fetchedMessages)
+    }
+  }, [fetchedMessages])
+
+  const handleNewSession = async () => {
+    if (!repoId) return
+    const res = await createSession({
+      title: `Conversation ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+    })
+    setActiveSessionId(res.session_id)
+    setLocalMessages([])
+  }
+
+  const handleSendMessage = (content: string) => {
+    if (!content.trim() || !activeSessionId) return
+
+    const userMessage: ChatMessageResponse = {
+      id: crypto.randomUUID(),
+      session_id: activeSessionId,
+      role: 'user',
+      content: content.trim(),
+      created_at: new Date().toISOString(),
+    }
+
+    // Append user message immediately
+    setLocalMessages((prev) => [...prev, userMessage])
+    setIsSending(true)
+
+    // Phase 14 static placeholder reply simulation (Phase 15 connects token streaming)
+    setTimeout(() => {
+      const assistantMessage: ChatMessageResponse = {
+        id: crypto.randomUUID(),
+        session_id: activeSessionId,
+        role: 'assistant',
+        content: `I analyzed your request about "${content}". Here is the architectural summary based on the indexed codebase.\n\n\`\`\`typescript\n// Relevant function implementation\nexport function handleAuth() {\n  return { authenticated: true }\n}\n\`\`\`\n\n- Verified authentication handlers in \`app/services/auth.py\`\n- Traced route definitions in \`app/api/routes.py\``,
+        created_at: new Date().toISOString(),
+      }
+      setLocalMessages((prev) => [...prev, assistantMessage])
+      setIsSending(false)
+    }, 400)
+  }
+
+  if (!repoId) return null
 
   return (
-    <div className="h-[600px] flex flex-col rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 p-4 bg-slate-950/60">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-indigo-400" />
-          <h3 className="text-sm font-semibold text-slate-200">
-            AI Assistant Chat
-          </h3>
-        </div>
-        <Badge variant="success">Grounded RAG</Badge>
-      </div>
-
-      {/* Messages Feed */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
-        {mockChatMessages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex flex-col ${
-              msg.role === 'user' ? 'items-end' : 'items-start'
-            }`}
-          >
-            <div
-              className={`max-w-xl rounded-xl p-3.5 text-xs leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-indigo-600 text-white rounded-br-none'
-                  : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
-              }`}
-            >
-              <p>{msg.content}</p>
-              {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-2.5 pt-2 border-t border-slate-700/60 flex flex-wrap gap-1.5">
-                  <span className="text-[10px] text-slate-400 font-semibold">Sources:</span>
-                  {msg.sources.map((src, i) => (
-                    <span
-                      key={i}
-                      className="text-[10px] font-mono bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700 text-indigo-300"
-                    >
-                      {src.path}:{src.start_line}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Input Form */}
-      <div className="border-t border-slate-800 p-4 bg-slate-950/80 flex items-center gap-2">
-        <div className="flex-1">
-          <Input
-            placeholder={`Ask a question about repository ${repoId}...`}
-            leftIcon={<MessageSquare className="h-4 w-4" />}
-          />
-        </div>
-        <Button size="md" leftIcon={<Send className="h-4 w-4" />}>
-          Send
-        </Button>
-      </div>
+    <div className="h-full min-h-[650px] flex flex-col">
+      <ChatLayout
+        repoId={repoId}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        messages={localMessages}
+        isLoadingHistory={historyLoading && localMessages.length === 0}
+        isHistoryError={historyError}
+        onSelectSession={setActiveSessionId}
+        onNewSession={handleNewSession}
+        onSendMessage={handleSendMessage}
+        isSending={isSending}
+      />
     </div>
   )
 }

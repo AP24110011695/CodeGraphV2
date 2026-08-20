@@ -89,85 +89,127 @@ describe('Router Integration', () => {
   })
 
   it('navigates to /repositories/$repoId/files and renders file explorer', async () => {
-    const path = `/repositories/${REPO_ID}/files`
+    const routePath = '/repositories/$repoId/files'
+    const targetUrl = `/repositories/${REPO_ID}/files`
     const rootRoute = createRootRoute({
       component: () => <Outlet />,
       notFoundComponent: NotFoundComponent,
     })
     const route = createRoute({
       getParentRoute: () => rootRoute,
-      path,
+      path: routePath,
       component: RepositoryFilesPage,
     })
     const r = createRouter({ routeTree: rootRoute.addChildren([route]) })
     await act(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await r.navigate({ to: path } as any)
+      await r.navigate({ to: targetUrl } as any)
       await r.load()
     })
-    render(<RouterProvider router={r} />)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <RouterProvider router={r} />
+        </ToastProvider>
+      </QueryClientProvider>
+    )
 
-    expect(screen.getByText('File Explorer & Code Viewer')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('File Explorer')).toBeInTheDocument()
+    })
     // filename appears in both the sidebar file list and the CodeBlock header
-    expect(screen.getAllByText('app/services/auth.py').length).toBeGreaterThanOrEqual(1)
+    await waitFor(() => {
+      expect(screen.getAllByText('app/services/auth.py').length).toBeGreaterThanOrEqual(1)
+    })
   })
 
-  it('navigates to /repositories/$repoId/graph and renders graph placeholder', async () => {
-    const path = `/repositories/${REPO_ID}/graph`
+  it('navigates to /repositories/$repoId/graph and renders graph page', async () => {
+    const routePath = '/repositories/$repoId/graph'
+    const targetUrl = `/repositories/${REPO_ID}/graph`
     const rootRoute = createRootRoute({ component: () => <Outlet /> })
     const route = createRoute({
       getParentRoute: () => rootRoute,
-      path,
+      path: routePath,
       component: RepositoryGraphPage,
     })
     const r = createRouter({ routeTree: rootRoute.addChildren([route]) })
     await act(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await r.navigate({ to: path } as any)
+      await r.navigate({ to: targetUrl } as any)
       await r.load()
     })
-    render(<RouterProvider router={r} />)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <RouterProvider router={r} />
+        </ToastProvider>
+      </QueryClientProvider>
+    )
 
-    expect(screen.getByText('Dependency Graph Visualization')).toBeInTheDocument()
-    expect(screen.getByText('Interactive 3D Dependency Graph')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByTestId('dependency-graph-container')).toBeInTheDocument()
+      expect(screen.getByText('Languages:')).toBeInTheDocument()
+    })
   })
 
-  it('navigates to /repositories/$repoId/search and renders search placeholder', async () => {
-    const path = `/repositories/${REPO_ID}/search`
+  it('navigates to /repositories/$repoId/search and renders search page', async () => {
+    const routePath = '/repositories/$repoId/search'
+    const targetUrl = `/repositories/${REPO_ID}/search`
     const rootRoute = createRootRoute({ component: () => <Outlet /> })
     const route = createRoute({
       getParentRoute: () => rootRoute,
-      path,
+      path: routePath,
       component: RepositorySearchPage,
     })
     const r = createRouter({ routeTree: rootRoute.addChildren([route]) })
     await act(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await r.navigate({ to: path } as any)
+      await r.navigate({ to: targetUrl } as any)
       await r.load()
     })
-    render(<RouterProvider router={r} />)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <RouterProvider router={r} />
+        </ToastProvider>
+      </QueryClientProvider>
+    )
 
     expect(screen.getByText('Semantic Code Search')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
   })
 
-  it('navigates to /repositories/$repoId/chat and renders AI chat placeholder', async () => {
-    const path = `/repositories/${REPO_ID}/chat`
+  it('navigates to /repositories/$repoId/chat and renders AI chat page', async () => {
+    const routePath = '/repositories/$repoId/chat'
+    const targetUrl = `/repositories/${REPO_ID}/chat`
     const rootRoute = createRootRoute({ component: () => <Outlet /> })
     const route = createRoute({
       getParentRoute: () => rootRoute,
-      path,
+      path: routePath,
       component: RepositoryChatPage,
     })
     const r = createRouter({ routeTree: rootRoute.addChildren([route]) })
     await act(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await r.navigate({ to: path } as any)
+      await r.navigate({ to: targetUrl } as any)
       await r.load()
     })
-    render(<RouterProvider router={r} />)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <RouterProvider router={r} />
+        </ToastProvider>
+      </QueryClientProvider>
+    )
 
-    expect(screen.getByText('AI Assistant Chat')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('CodeGraph Chat')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /new chat/i })).toBeInTheDocument()
+    })
   })
 
   it('renders 404 NotFoundComponent on unmatched route', async () => {

@@ -1,48 +1,55 @@
+import * as React from 'react'
 import { useParams } from '@tanstack/react-router'
-import { Search as SearchIcon } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { mockSearchResults } from '@/lib/api'
+import { SearchBar } from '@/features/search/components/search-bar'
+import { SearchResults } from '@/features/search/components/search-results'
+import { useSearch } from '@/features/search/hooks/use-search'
 
 export function RepositorySearchPage() {
   const { repoId } = useParams({ strict: false })
+  const [currentQuery, setCurrentQuery] = React.useState('')
+  const [hasSearched, setHasSearched] = React.useState(false)
+
+  const {
+    mutate: executeSearch,
+    data: searchResponse,
+    isPending,
+    error,
+  } = useSearch(repoId)
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) return
+    setCurrentQuery(query)
+    setHasSearched(true)
+    executeSearch({ query, limit: 15 })
+  }
+
+  const handleRetry = () => {
+    if (currentQuery) {
+      executeSearch({ query: currentQuery, limit: 15 })
+    }
+  }
+
+  if (!repoId) return null
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-          <SearchIcon className="h-5 w-5 text-indigo-400" /> Semantic Code Search
-        </h3>
-        <p className="text-xs text-slate-400">
-          Search code semantically across repository <code className="text-slate-300">{repoId}</code>
-        </p>
-      </div>
-
-      <Input
-        placeholder="Search functions, classes, or natural language concepts..."
-        leftIcon={<SearchIcon className="h-4 w-4" />}
-        defaultValue="login authentication"
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Search Input Bar */}
+      <SearchBar
+        onSearch={handleSearch}
+        isLoading={isPending}
+        initialQuery={currentQuery}
       />
 
-      <div className="space-y-3">
-        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          Results (2 matches)
-        </div>
-        {mockSearchResults.map((result) => (
-          <Card key={result.chunk_id} className="p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-indigo-300 font-semibold">
-                {result.path}:{result.start_line}-{result.end_line}
-              </span>
-              <Badge variant="info">Score: {result.score}</Badge>
-            </div>
-            <pre className="text-xs font-mono bg-slate-950 p-2.5 rounded border border-slate-800 text-slate-300 overflow-x-auto">
-              <code>{result.content}</code>
-            </pre>
-          </Card>
-        ))}
-      </div>
+      {/* Results or Empty/Loading/Error states */}
+      <SearchResults
+        results={searchResponse?.results ?? null}
+        query={currentQuery}
+        hasSearched={hasSearched}
+        isLoading={isPending}
+        error={error}
+        repoId={repoId}
+        onRetry={handleRetry}
+      />
     </div>
   )
 }

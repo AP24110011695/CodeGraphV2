@@ -33,13 +33,13 @@ Identical to `BACKEND.md → Autonomous Execution Protocol` — read it there. I
 | 5     | Routing & Application Shell Layout                | COMPLETED   |
 | 6     | Global State, Connection Settings & Reactive Auth | COMPLETED   |
 | 7     | Repository List & Upload/Clone UI                 | COMPLETED   |
-| 8     | Repository Overview Page & API Hooks              | NOT STARTED |
-| 9     | Processing Status UI (Live Progress)              | NOT STARTED |
-| 10    | File Tree & Code Viewer                           | NOT STARTED |
-| 11    | Symbol Panel & Resizable Explorer Layout          | NOT STARTED |
-| 12    | Dependency Graph Visualization                    | NOT STARTED |
-| 13    | Semantic Search UI                                | NOT STARTED |
-| 14    | Chat Layout, Sessions & Message Rendering         | NOT STARTED |
+| 8     | Repository Overview Page & API Hooks              | COMPLETED   |
+| 9     | Processing Status UI (Live Progress)              | COMPLETED   |
+| 10    | File Tree & Code Viewer                           | COMPLETED   |
+| 11    | Symbol Panel & Resizable Explorer Layout          | COMPLETED   |
+| 12    | Dependency Graph Visualization                    | COMPLETED   |
+| 13    | Semantic Search UI                                | COMPLETED   |
+| 14    | Chat Layout, Sessions & Message Rendering         | COMPLETED   |
 | 15    | Streaming, Sources & Starter Suggestions          | NOT STARTED |
 | 16    | Polish, Accessibility & Responsive Design         | NOT STARTED |
 | 17    | Frontend Testing Suite                            | NOT STARTED |
@@ -1028,10 +1028,10 @@ npm run dev   # browse the mock repo's file tree, open several files
 
 ### 12. Completion Criteria
 
-- [ ] File tree correctly nests a flat file list and supports expand/collapse
-- [ ] Code viewer syntax-highlights based on the file's reported language
-- [ ] Binary files show a clear placeholder instead of crashing
-- [ ] `npm run test -- features/files` passes
+- [x] File tree correctly nests a flat file list and supports expand/collapse
+- [x] Code viewer syntax-highlights based on the file's reported language
+- [x] Binary files show a clear placeholder instead of crashing
+- [x] `npm run test -- features/files` passes
 
 ---
 
@@ -1108,10 +1108,10 @@ npm run dev   # select a file, click a symbol, confirm the viewer scrolls/highli
 
 ### 12. Completion Criteria
 
-- [ ] Symbol panel lists and groups symbols correctly from mock data
-- [ ] Clicking a symbol scrolls and highlights the corresponding code
-- [ ] All three panes are resizable and widths persist
-- [ ] `npm run test -- features/files` passes
+- [x] Symbol panel lists and groups symbols correctly from mock data
+- [x] Clicking a symbol scrolls and highlights the corresponding code
+- [x] All three panes are resizable and widths persist
+- [x] `npm run test -- features/files` passes
 
 ---
 
@@ -1192,11 +1192,11 @@ npm run dev   # open the graph tab for a mock repo, pan/zoom, click a node, conf
 
 ### 12. Completion Criteria
 
-- [ ] Graph renders nodes/edges from the API response via Sigma
-- [ ] Node size/color reflect pagerank/language; entry points visually distinguished
-- [ ] Clicking a node shows correct detail (symbols, deps, dependents)
-- [ ] Cycle warning shown when applicable
-- [ ] `npm run test -- features/graph` passes
+- [x] Graph renders nodes/edges from the API response via Sigma
+- [x] Node size/color reflect pagerank/language; entry points visually distinguished
+- [x] Clicking a node shows correct detail (symbols, deps, dependents)
+- [x] Cycle warning shown when applicable
+- [x] `npm run test -- features/graph` passes
 
 ---
 
@@ -1274,10 +1274,10 @@ npm run dev   # run a search against the mock API, click a result, confirm it op
 
 ### 12. Completion Criteria
 
-- [ ] Search submits and displays ranked results with snippets
-- [ ] Clicking a result opens the correct file at the correct line in the Files tab
-- [ ] Loading/empty/error states all present
-- [ ] `npm run test -- features/search` passes
+- [x] Search submits and displays ranked results with snippets
+- [x] Clicking a result opens the correct file at the correct line in the Files tab
+- [x] Loading/empty/error states all present
+- [x] `npm run test -- features/search` passes
 
 ---
 
@@ -1357,10 +1357,10 @@ npm run dev   # open the chat tab, confirm history renders and sending a message
 
 ### 12. Completion Criteria
 
-- [ ] Chat session is created/retrieved correctly
-- [ ] Message history renders with correct role styling and markdown/code formatting
-- [ ] Input handles Enter/Shift+Enter and disables while a response is in flight
-- [ ] `npm run test -- features/chat` passes
+- [x] Chat session is created/retrieved correctly
+- [x] Message history renders with correct role styling and markdown/code formatting
+- [x] Input handles Enter/Shift+Enter and disables while a response is in flight
+- [x] `npm run test -- features/chat` passes
 
 ---
 
