@@ -31,8 +31,8 @@ Identical to `BACKEND.md → Autonomous Execution Protocol` — read it there. I
 | 3     | Design Tokens & Core Primitives                   | COMPLETED   |
 | 4     | Composite UI Components & Kitchen Sink            | COMPLETED   |
 | 5     | Routing & Application Shell Layout                | COMPLETED   |
-| 6     | Global State, Connection Settings & Reactive Auth | NOT STARTED |
-| 7     | Repository List & Upload/Clone UI                 | NOT STARTED |
+| 6     | Global State, Connection Settings & Reactive Auth | COMPLETED   |
+| 7     | Repository List & Upload/Clone UI                 | COMPLETED   |
 | 8     | Repository Overview Page & API Hooks              | NOT STARTED |
 | 9     | Processing Status UI (Live Progress)              | NOT STARTED |
 | 10    | File Tree & Code Viewer                           | NOT STARTED |

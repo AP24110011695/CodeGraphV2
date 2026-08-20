@@ -1,3 +1,4 @@
+import { useConnectionStore } from '@/stores/connection-store'
 import { ApiClientError } from './errors'
 import type {
   ApiClient,
@@ -28,17 +29,33 @@ export interface RealClientConfig {
 }
 
 export class RealApiClient implements ApiClient {
-  private baseUrl: string
+  private customBaseUrl?: string
   private getApiKey?: () => string | null
 
   constructor(config: RealClientConfig = {}) {
-    this.baseUrl = (
-      config.baseUrl ||
+    if (config.baseUrl) {
+      this.customBaseUrl = config.baseUrl.replace(/\/$/, '')
+    }
+    this.getApiKey = config.getApiKey
+  }
+
+  private getEffectiveBaseUrl(): string {
+    if (this.customBaseUrl) {
+      return this.customBaseUrl
+    }
+    try {
+      const storeUrl = useConnectionStore.getState?.()?.apiBaseUrl
+      if (storeUrl) {
+        return storeUrl.replace(/\/$/, '')
+      }
+    } catch {
+      // Store may not be initialized
+    }
+    return (
       (typeof import.meta !== 'undefined' &&
         import.meta.env?.VITE_API_BASE_URL) ||
       'http://localhost:8000'
     ).replace(/\/$/, '')
-    this.getApiKey = config.getApiKey
   }
 
   private getHeaders(contentType: string | null = 'application/json'): HeadersInit {
@@ -47,7 +64,17 @@ export class RealApiClient implements ApiClient {
       headers['Content-Type'] = contentType
     }
 
-    const apiKey = this.getApiKey ? this.getApiKey() : null
+    let apiKey: string | null = null
+    if (this.getApiKey) {
+      apiKey = this.getApiKey()
+    } else {
+      try {
+        apiKey = useConnectionStore.getState?.()?.apiKey || null
+      } catch {
+        // Store may not be initialized
+      }
+    }
+
     if (apiKey) {
       headers['X-API-Key'] = apiKey
     }
@@ -70,7 +97,7 @@ export class RealApiClient implements ApiClient {
     path: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseUrl}${path}`
+    const url = `${this.getEffectiveBaseUrl()}${path}`
     const isFormData = options.body instanceof FormData
     const defaultHeaders = this.getHeaders(isFormData ? null : 'application/json')
 
@@ -237,7 +264,7 @@ export class RealApiClient implements ApiClient {
     callbacks: StreamChatCallbacks,
     signal?: AbortSignal
   ): Promise<void> {
-    const url = `${this.baseUrl}/api/v1/repositories/${repoId}/chat/sessions/${sessionId}/messages`
+    const url = `${this.getEffectiveBaseUrl()}/api/v1/repositories/${repoId}/chat/sessions/${sessionId}/messages`
     const defaultHeaders = this.getHeaders('application/json')
 
     try {

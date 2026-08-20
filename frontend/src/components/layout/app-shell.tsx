@@ -1,9 +1,11 @@
 import * as React from 'react'
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useNavigate } from '@tanstack/react-router'
 import { Sidebar } from './sidebar'
 import { Header } from './header'
-import { ToastProvider } from '@/components/ui/toast'
+import { ToastProvider, useToast } from '@/components/ui/toast'
 import { ErrorState } from '@/components/ui/error-state'
+import { useUiStore } from '@/stores/ui-store'
+import { AUTH_REQUIRED_EVENT } from '@/lib/query-client'
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
@@ -56,28 +58,51 @@ export interface AppShellProps {
   children?: React.ReactNode
 }
 
-export function AppShell({ children }: AppShellProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false)
+function AppShellInner({ children }: AppShellProps) {
+  const isSidebarCollapsed = useUiStore((state) => state.isSidebarCollapsed)
+  const toggleSidebar = useUiStore((state) => state.toggleSidebar)
+  const toast = useToast()
+  const navigate = useNavigate()
+
+  React.useEffect(() => {
+    const handleAuthRequired = () => {
+      toast.warning(
+        'This backend endpoint requires authentication. Please configure your API key.',
+        'Authentication Required'
+      )
+    }
+
+    window.addEventListener(AUTH_REQUIRED_EVENT, handleAuthRequired)
+    return () => {
+      window.removeEventListener(AUTH_REQUIRED_EVENT, handleAuthRequired)
+    }
+  }, [toast, navigate])
 
   return (
-    <ToastProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
-        {/* Persistent Sidebar */}
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
-        />
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
+      {/* Persistent Sidebar */}
+      <Sidebar
+        collapsed={isSidebarCollapsed}
+        onToggleCollapse={toggleSidebar}
+      />
 
-        {/* Main Content Area */}
-        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-          <Header />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950 p-6">
-            <RouteErrorBoundary>
-              {children || <Outlet />}
-            </RouteErrorBoundary>
-          </main>
-        </div>
+      {/* Main Content Area */}
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+        <Header />
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950 p-6">
+          <RouteErrorBoundary>
+            {children || <Outlet />}
+          </RouteErrorBoundary>
+        </main>
       </div>
+    </div>
+  )
+}
+
+export function AppShell({ children }: AppShellProps) {
+  return (
+    <ToastProvider>
+      <AppShellInner>{children}</AppShellInner>
     </ToastProvider>
   )
 }

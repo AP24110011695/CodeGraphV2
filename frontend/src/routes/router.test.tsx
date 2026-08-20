@@ -1,6 +1,5 @@
-import React from 'react'
 import { describe, it, expect } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, waitFor } from '@testing-library/react'
 import {
   createRootRoute,
   createRoute,
@@ -8,6 +7,9 @@ import {
   RouterProvider,
   Outlet,
 } from '@tanstack/react-router'
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ToastProvider } from '@/components/ui/toast'
 
 // Import page components directly rather than navigating a shared singleton router.
 import { RepositoriesIndexPage } from './repositories/index'
@@ -27,6 +29,14 @@ async function renderRoute<P extends Record<string, string> = Record<string, str
   Component: (props: { params: P }) => React.ReactNode,
   params?: P
 ) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+
   const rootRoute = createRootRoute({
     component: () => <Outlet />,
     notFoundComponent: NotFoundComponent,
@@ -52,7 +62,13 @@ async function renderRoute<P extends Record<string, string> = Record<string, str
     await r.load()
   })
 
-  render(<RouterProvider router={r} />)
+  render(
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <RouterProvider router={r} />
+      </ToastProvider>
+    </QueryClientProvider>
+  )
 }
 
 describe('Router Integration', () => {
@@ -60,14 +76,16 @@ describe('Router Integration', () => {
     await renderRoute('/', () => <RepositoriesIndexPage />)
 
     expect(screen.getByRole('heading', { name: /repositories/i })).toBeInTheDocument()
-    expect(screen.getByText('fastapi-backend')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getAllByText('fastapi-backend').length).toBeGreaterThanOrEqual(1)
+    })
   })
 
   it('navigates to /settings and renders Settings page', async () => {
     await renderRoute('/settings', () => <SettingsPage />)
 
     expect(screen.getByText('Connection Settings')).toBeInTheDocument()
-    expect(screen.getByText('Backend Configuration')).toBeInTheDocument()
+    expect(screen.getByText('API Configuration')).toBeInTheDocument()
   })
 
   it('navigates to /repositories/$repoId/files and renders file explorer', async () => {
